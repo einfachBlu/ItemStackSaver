@@ -1,5 +1,6 @@
 package de.blu.itemstacksaver;
 
+import com.google.inject.Inject;
 import de.blu.database.DatabaseAPI;
 import de.blu.database.storage.cassandra.CassandraConnection;
 import de.blu.database.storage.redis.RedisConnection;
@@ -9,7 +10,6 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.Map;
@@ -23,8 +23,8 @@ public final class ItemStackSaver {
   @Getter private static ItemStackSaver instance;
 
   @Inject private ExecutorService executorService;
-  @Inject private RedisConnection redisConnection;
-  @Inject private CassandraConnection cassandraConnection;
+  private RedisConnection redisConnection = DatabaseAPI.getInstance().getRedisConnection();
+  private CassandraConnection cassandraConnection = DatabaseAPI.getInstance().getCassandraConnection();
 
   public ItemStackSaver() {
     ItemStackSaver.instance = this;
