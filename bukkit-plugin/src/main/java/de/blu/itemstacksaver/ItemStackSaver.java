@@ -3,8 +3,10 @@ package de.blu.itemstacksaver;
 import de.blu.database.DatabaseAPI;
 import de.blu.database.storage.cassandra.CassandraConnection;
 import de.blu.database.storage.redis.RedisConnection;
+import de.blu.itemstacksaver.event.ItemStackSaveEvent;
 import de.blu.itemstacksaver.util.ItemSerialization;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 
 import javax.inject.Inject;
@@ -63,6 +65,10 @@ public final class ItemStackSaver {
     if (!DatabaseAPI.getInstance().getCassandraConfig().isEnabled()) {
       return;
     }
+
+    ItemStackSaveEvent event = new ItemStackSaveEvent(key, itemStacks);
+    Bukkit.getServer().getPluginManager().callEvent(event);
+    itemStacks = event.getItemStacks();
 
     String itemStackString = ItemSerialization.toBase64(itemStacks);
 
