@@ -1,0 +1,7 @@
+name: ItemStackSaver
+main: de.blu.itemstacksaver.ItemStackSaverPlugin
+api-version: 1.16
+version: 1.0.0
+author: Blu
+depend:
+  - DatabaseSystem
