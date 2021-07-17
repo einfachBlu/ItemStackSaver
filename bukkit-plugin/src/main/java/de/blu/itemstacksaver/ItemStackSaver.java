@@ -9,6 +9,7 @@ import de.blu.itemstacksaver.util.ItemSerialization;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.inject.Singleton;
 import java.util.Collection;
@@ -22,9 +23,11 @@ public final class ItemStackSaver {
 
   @Getter private static ItemStackSaver instance;
 
+  @Inject private JavaPlugin javaPlugin;
   @Inject private ExecutorService executorService;
   private RedisConnection redisConnection = DatabaseAPI.getInstance().getRedisConnection();
-  private CassandraConnection cassandraConnection = DatabaseAPI.getInstance().getCassandraConnection();
+  private CassandraConnection cassandraConnection =
+      DatabaseAPI.getInstance().getCassandraConnection();
 
   public ItemStackSaver() {
     ItemStackSaver.instance = this;
@@ -61,14 +64,10 @@ public final class ItemStackSaver {
         });
   }
 
-  public void setItemStacks(String key, ItemStack[] itemStacks) {
+  private void setItemStacks(String key, ItemStack[] itemStacks) {
     if (!DatabaseAPI.getInstance().getCassandraConfig().isEnabled()) {
       return;
     }
-
-    ItemStackSaveEvent event = new ItemStackSaveEvent(key, itemStacks);
-    Bukkit.getServer().getPluginManager().callEvent(event);
-    itemStacks = event.getItemStacks();
 
     String itemStackString = ItemSerialization.toBase64(itemStacks);
 
@@ -91,9 +90,12 @@ public final class ItemStackSaver {
   }
 
   public void setItemStacksAsync(String key, ItemStack[] itemStacks) {
+    ItemStackSaveEvent event = new ItemStackSaveEvent(key, itemStacks);
+    Bukkit.getServer().getPluginManager().callEvent(event);
+
     this.executorService.submit(
         () -> {
-          this.setItemStacks(key, itemStacks);
+          this.setItemStacks(key, event.getItemStacks());
         });
   }
 }
